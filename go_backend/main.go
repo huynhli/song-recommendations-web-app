@@ -2,15 +2,10 @@ package main
 
 import (
 	"os"
+	"net/http"
 )
 
 func main() {
-	engine := html.New("./views", ".tmpl")
-
-	app := fiber.New(fiber.Config{
-		Views: engine,
-	})
-
-	app.Static("/", "./public")
+	
 
 }
