@@ -2,29 +2,36 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
+	//Set port from env var
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Default to 8080 if PORT is not set
 	}
 
-	print("Welcome to the song recommendation web app!")
+	//create new Fiber app
+	app := fiber.New()
 
-	//handler -> (url, function to handle)
-	http.HandleFunc("/", homePage)
+	//enable CORS to allow requests to backend
+	app.Use(cors.New())
+
+	//routing
+	app.Get("/", homePage)
 
 	//port listen and serve
-	err := http.ListenAndServe(":"+port, nil)
+	err := app.Listen(":" + port)
 	if err != nil {
-		print(err.Error())
+		fmt.Println("Error starting server: ", err)
 	}
 
 }
 
-func homePage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintln(writer, "Hi this is the home page of the song recommendation web app. The Github repo can be found at: https://github.com/huynhli/song-recommendations-web-app")
+func homePage(c *fiber.Ctx) error {
+	return c.SendString("Hi this is the home page of the song recommendation web app. The Github repo can be found at: https://github.com/huynhli/song-recommendations-web-app")
 }
