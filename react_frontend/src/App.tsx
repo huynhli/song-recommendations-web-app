@@ -5,6 +5,8 @@ import './App.css'
 
 function App() {
   const [genreList, setGenreList] = useState<string[]>([]);
+  const [genreAPI, setGenreAPI] = useState<string[]>([]);
+  const [link, setLink] = useState("");
 
   const handleClick = () => {
     // Fetch token from backend using fetch API
@@ -23,6 +25,23 @@ function App() {
       });
   };
 
+  const handleAPI = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/data?link=${link}`)
+      const data = await response.json();
+      setGenreAPI(data)
+    } catch (error) {
+      console.error('Error fetching: ', error)
+    }
+
+  }
+
+  const handleLinkChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLink(event.target.value);
+  }
+
+
+
   return (
     <>
       <div>
@@ -35,9 +54,17 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        
-      <button onClick={handleClick}>Click here for genres</button>
-      <p>{genreList} here</p>
+        <input
+          type="text"
+          value={link}
+          onChange={handleLinkChange} // Update state as user types
+          placeholder="Enter link"
+        />
+        <button onClick={handleAPI}>Click here for genres</button>
+        <p>{genreAPI} here is API</p>
+        <button onClick={handleClick}>Click here for genres</button>
+        <p>{genreList} here</p>
+
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
