@@ -1,10 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [genreList, setGenreList] = useState<string[]>([]);
+
+  const handleClick = () => {
+    // Fetch token from backend using fetch API
+    fetch("http://localhost:8080/data") //sends GET to backend at that link
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setGenreList(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching token:", error);
+      });
+  };
 
   return (
     <>
@@ -18,12 +35,9 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        
+      <button onClick={handleClick}>Click here for genres</button>
+      <p>{genreList} here</p>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more

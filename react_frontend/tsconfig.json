@@ -1,7 +1,20 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "target": "esnext",                    // Specifies the target JavaScript version
+    "module": "esnext",                    // Specifies the module system (use esnext for modern apps)
+    "moduleResolution": "node",            // Allows TypeScript to find modules in node_modules
+    "jsx": "react-jsx",                    // Important for React 17+ and JSX transformation
+    "strict": true,                        // Enable strict type checking options
+    "esModuleInterop": true,               // Ensure compatibility with ES Modules
+    "skipLibCheck": true,                  // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true  // Ensures consistent casing of file names
+  },
+  "include": [
+    "src/**/*"                             // Includes all TypeScript/TSX files inside src folder
+  ],
+  "exclude": [
+    "node_modules"                         // Excludes node_modules folder from compilation
   ]
 }
