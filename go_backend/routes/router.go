@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"go_backend/config"
 	"io"
 	"log"
@@ -51,7 +50,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 		if strings.Contains(link, "https://open.spotify.com/") {
 			if strings.Contains(link[25:], "artist") {
 				typeOf = "artist"
-				for _, each := range(link[25:]) {
+				for _, each := range link[32:] {
 					if each == '?' {
 						break
 					}
@@ -59,7 +58,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 				}
 			} else if strings.Contains(link[25:], "track") {
 				typeOf = "track"
-				for _, each := range(link[25:]) {
+				for _, each := range link[31:] {
 					if each == '?' {
 						break
 					}
@@ -67,7 +66,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 				}
 			} else if strings.Contains(link[25:], "album") {
 				typeOf = "album"
-				for _, each := range(link[25:]) {
+				for _, each := range link[31:] {
 					if each == '?' {
 						break
 					}
@@ -75,7 +74,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 				}
 			} else if strings.Contains(link[25:], "playlist") {
 				typeOf = "playlist"
-				for _, each := range(link[25:]) {
+				for _, each := range link[34:] {
 					if each == '?' {
 						break
 					}
@@ -85,7 +84,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 		}
 
 		// if no assignment, link is broken, return so
-		if (typeOf == "" || spotifyID.Len() == 0) {
+		if typeOf == "" || spotifyID.Len() == 0 {
 			return c.JSON(tempList[2:3])
 		}
 
@@ -158,7 +157,7 @@ func generateToken() string {
 	return tokenResponse.AccessToken
 }
 
-func apiRequest(accessToken string, spotifyID string, typeOf string) {
+func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 	// API request
 	// Description:
 	// "genres" is deprecated, so the solution is by cases
@@ -170,4 +169,257 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) {
 	//    find artists most frequently occuring -> dict, save top frequent 10 genres -> dict
 	// then, find genres of browse playlist if exist
 
+	switch typeOf {
+	case "artist":
+		// create get request to link
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/artists/"+spotifyID, nil)
+		if err != nil {
+			log.Fatalf("Error creating GET: %v", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+
+		// send request to HTTP client instance
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Error sending response: %v", err)
+		}
+		defer resp.Body.Close()
+
+		//read response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Error reading response: %v", err)
+		}
+		println("response is: ", string(body))
+
+		var Artist struct {
+			Genres []string `json:"genres"`
+		}
+		err = json.Unmarshal(body, &Artist)
+		if err != nil {
+			log.Fatalf("Error unmarshalling JSON: %v", err)
+		}
+		println("Genres: ", strings.Join(Artist.Genres, ", "))
+		return Artist.Genres
+
+	case "track":
+		// create get request to link
+		// https://open.spotify.com/track/5mCPDVBb16L4XQwDdbRUpz?si=7b16415c950a4448
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/tracks/"+spotifyID, nil)
+		if err != nil {
+			log.Fatalf("Error creating GET: %v", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+
+		// send request to HTTP client instance
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Error sending response: %v", err)
+		}
+		defer resp.Body.Close()
+
+		//read response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Error reading response: %v", err)
+		}
+
+		var Track struct {
+			Artists []struct {
+				ArtistID string `json:"id"`
+			} `json:"artists"`
+			IsLocal bool `json:"is_local"`
+		}
+
+		err = json.Unmarshal(body, &Track)
+		if err != nil {
+			log.Fatalf("Error unmarshalling JSON: %v", err)
+		}
+
+		localReturn := []string{"Local track. Try a non-local track."}
+		if Track.IsLocal {
+			return localReturn
+		}
+
+		var totalGenresList []string
+		for _, eachArtist := range(Track.Artists) {
+			// create get request to link
+			req, err := http.NewRequest("GET", "https://api.spotify.com/v1/artists/"+eachArtist.ArtistID, nil)
+			if err != nil {
+				log.Fatalf("Error creating GET: %v", err)
+			}
+			req.Header.Set("Authorization", "Bearer "+accessToken)
+
+			// send request to HTTP client instance
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				log.Fatalf("Error sending response: %v", err)
+			}
+			defer resp.Body.Close()
+
+			//read response
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatalf("Error reading response: %v", err)
+			}
+
+			var Artist struct {
+				Genres []string `json:"genres"`
+			}
+			err = json.Unmarshal(body, &Artist)
+			if err != nil {
+				log.Fatalf("Error unmarshalling JSON: %v", err)
+			}
+			totalGenresList = append(totalGenresList, Artist.Genres...)
+		}
+		return totalGenresList
+		
+
+	case "album":
+		// create get request to link
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/albums/"+spotifyID+"/tracks", nil)
+		if err != nil {
+			log.Fatalf("Error creating GET: %v", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+
+		// send request to HTTP client instance
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Error sending response: %v", err)
+		}
+		defer resp.Body.Close()
+
+		//read response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Error reading response: %v", err)
+		}
+
+		var Album struct {
+			Tracks []struct {
+				TrackID string `json:"id"`
+			} `json:"items"`
+		}
+		err = json.Unmarshal(body, &Album)
+		if err != nil {
+			log.Fatalf("Error unmarshalling JSON: %v", err)
+		}
+		println("response is: ", string(body))
+
+		var totalGenresList []string
+		for _, eachTrack := range Album.Tracks {
+			// create get request to link
+			req, err := http.NewRequest("GET", "https://api.spotify.com/v1/tracks/"+eachTrack.TrackID, nil)
+			if err != nil {
+				log.Fatalf("Error creating GET: %v", err)
+			}
+			req.Header.Set("Authorization", "Bearer "+accessToken)
+
+			// send request to HTTP client instance
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				log.Fatalf("Error sending response: %v", err)
+			}
+			defer resp.Body.Close()
+
+			//read response
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatalf("Error reading response: %v", err)
+			}
+
+			var Track struct {
+				Artists struct {
+					genres []string `json:"genres"`
+				} `json:"artists"`
+			}
+			err = json.Unmarshal(body, &Track)
+			if err != nil {
+				log.Fatalf("Error unmarshalling JSON: %v", err)
+			}
+			totalGenresList = append(totalGenresList, Track.Artists.genres...)
+		}
+		println("Genres: ", strings.Join(totalGenresList, ", "))
+		return totalGenresList
+
+	case "playlist":
+		// create get request to link
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+spotifyID+"/tracks", nil)
+		if err != nil {
+			log.Fatalf("Error creating GET: %v", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+
+		// send request to HTTP client instance
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Error sending response: %v", err)
+		}
+		defer resp.Body.Close()
+
+		//read response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Error reading response: %v", err)
+		}
+		println("response is: ", string(body))
+
+		var Playlist struct {
+			TrackList []struct {
+				Track struct {
+					TrackID string `json:"id"`
+				} `json:"track"`
+			} `json:"items"`
+		}
+		err = json.Unmarshal(body, &Playlist)
+		if err != nil {
+			log.Fatalf("Error unmarshalling JSON: %v", err)
+		}
+
+		var totalGenresList []string
+		for _, eachTrack := range Playlist.TrackList {
+			// create get request to link
+			req, err := http.NewRequest("GET", "https://api.spotify.com/v1/tracks/"+eachTrack.Track.TrackID, nil)
+			if err != nil {
+				log.Fatalf("Error creating GET: %v", err)
+			}
+			req.Header.Set("Authorization", "Bearer "+accessToken)
+
+			// send request to HTTP client instance
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				log.Fatalf("Error sending response: %v", err)
+			}
+			defer resp.Body.Close()
+
+			//read response
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatalf("Error reading response: %v", err)
+			}
+
+			var Track struct {
+				Artists struct {
+					Genres []string `json:"genres"`
+				} `json:"artists"`
+			}
+			err = json.Unmarshal(body, &Track)
+			if err != nil {
+				log.Fatalf("Error unmarshalling JSON: %v", err)
+			}
+			totalGenresList = append(totalGenresList, Track.Artists.Genres...)
+		}
+		println("Genres: ", strings.Join(totalGenresList, ", "))
+		return totalGenresList
+	}
+	tempList := []string{"Not a valid option."}
+	return tempList
 }
