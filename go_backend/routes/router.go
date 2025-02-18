@@ -42,6 +42,7 @@ func getGenreAPI(c *fiber.Ctx) error {
 	link := c.Query("link")
 
 	typeOf := ""
+	var spotifyID strings.Builder
 	tempList := []string{"This is a valid link.", "This is not a valid link. Try again.", "Not a valid spotify link. Try again.", "API process"}
 	if link == "" {
 		return c.JSON(tempList[1:2])
@@ -50,17 +51,41 @@ func getGenreAPI(c *fiber.Ctx) error {
 		if strings.Contains(link, "https://open.spotify.com/") {
 			if strings.Contains(link[25:], "artist") {
 				typeOf = "artist"
+				for _, each := range(link[25:]) {
+					if each == '?' {
+						break
+					}
+					spotifyID.WriteString(string(each))
+				}
 			} else if strings.Contains(link[25:], "track") {
 				typeOf = "track"
+				for _, each := range(link[25:]) {
+					if each == '?' {
+						break
+					}
+					spotifyID.WriteString(string(each))
+				}
 			} else if strings.Contains(link[25:], "album") {
 				typeOf = "album"
+				for _, each := range(link[25:]) {
+					if each == '?' {
+						break
+					}
+					spotifyID.WriteString(string(each))
+				}
 			} else if strings.Contains(link[25:], "playlist") {
 				typeOf = "playlist"
+				for _, each := range(link[25:]) {
+					if each == '?' {
+						break
+					}
+					spotifyID.WriteString(string(each))
+				}
 			}
 		}
 
 		// if no assignment, link is broken, return so
-		if typeOf == "" {
+		if (typeOf == "" || spotifyID.Len() == 0) {
 			return c.JSON(tempList[2:3])
 		}
 
@@ -81,8 +106,8 @@ func getGenreAPI(c *fiber.Ctx) error {
 	accessToken := generateToken()
 
 	// make api request, return json data -> genres, artists, artists top tracks
-	apiRequest(accessToken, link, typeOf)
-	return c.JSON(tempList[3:])
+	apiRequest(accessToken, spotifyID.String(), typeOf)
+	return c.JSON(tempList[3:], accessToken)
 }
 
 func generateToken() string {
@@ -122,9 +147,6 @@ func generateToken() string {
 		log.Fatalf("Error reading response body: %v", err)
 	}
 
-	// Print the response for debugging (can be removed later)
-	fmt.Println(string(body))
-
 	// Parse the JSON response into the TokenResponse struct
 	var tokenResponse TokenResponse
 	err = json.Unmarshal(body, &tokenResponse)
@@ -136,7 +158,7 @@ func generateToken() string {
 	return tokenResponse.AccessToken
 }
 
-func apiRequest(accessToken string, link string, typeOf string) {
+func apiRequest(accessToken string, spotifyID string, typeOf string) {
 	// API request
 	// Description:
 	// "genres" is deprecated, so the solution is by cases
@@ -147,5 +169,5 @@ func apiRequest(accessToken string, link string, typeOf string) {
 	// else given playlist:
 	//    find artists most frequently occuring -> dict, save top frequent 10 genres -> dict
 	// then, find genres of browse playlist if exist
-	
+
 }
