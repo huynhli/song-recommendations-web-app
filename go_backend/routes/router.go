@@ -87,26 +87,16 @@ func getGenreAPI(c *fiber.Ctx) error {
 		if typeOf == "" || spotifyID.Len() == 0 {
 			return c.JSON(tempList[2:3])
 		}
+		// link is good, so make token for api
+		accessToken := generateToken()
 
-		// if given artist: https://open.spotify.com/artist/6Xktu0x9IXB4ghFSPw6Jqv?si=vpU3HtylQTWYXDF9wZ95DA
-		// 	//    find genres of artist, save max 3
-		// 	// elif given song or album:https://open.spotify.com/track/0gNpXNiopu6nXKRPnfQ89E?si=1ca3023bb7da475d
-		// https://open.spotify.com/album/5FFviHXLHrtM8bPkklaXrD?si=RLEszY8eQNuy4LP7-kSl_A
-		// 	//    find artist(s), then genre of artist(s), save 3 each
-		// 	// else given playlist:
-		// https://open.spotify.com/playlist/18Mk8tJFfZdj1XvtDL9Bom?si=2b2d554c96a44807
-		// check is playlist, check !is_local, use artists -> 3 genres each max
-		// 	//    find artists most frequently occuring -> dict, save top frequent 10 genres -> dict
+		// make api request, return json data -> genres, artists, artists top tracks
+
+		returningData := apiRequest(accessToken, spotifyID.String(), typeOf)
+		return c.JSON(returningData)
 	}
 
 	// TODO make new request, send to loading screen
-
-	// link is good, so make token for api
-	accessToken := generateToken()
-
-	// make api request, return json data -> genres, artists, artists top tracks
-	apiRequest(accessToken, spotifyID.String(), typeOf)
-	return c.JSON(tempList[3:], accessToken)
 }
 
 func generateToken() string {
@@ -191,7 +181,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 		if err != nil {
 			log.Fatalf("Error reading response: %v", err)
 		}
-		println("response is: ", string(body))
 
 		var Artist struct {
 			Genres []string `json:"genres"`
@@ -200,7 +189,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 		if err != nil {
 			log.Fatalf("Error unmarshalling JSON: %v", err)
 		}
-		println("Genres: ", strings.Join(Artist.Genres, ", "))
 		return Artist.Genres
 
 	case "track":
@@ -275,7 +263,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 			}
 			totalGenresList = append(totalGenresList, Artist.Genres...)
 		}
-		println("Genres: ", strings.Join(totalGenresList, ", "))
 		return totalGenresList
 
 	case "album":
@@ -386,7 +373,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 				}
 			}
 		}
-		println("Genres: ", strings.Join(totalGenresList, ", "))
 		return totalGenresList
 
 	case "playlist":
@@ -500,7 +486,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 				}
 			}
 		}
-		println("Genres: ", strings.Join(totalGenresList, ", "))
 		return totalGenresList
 	}
 	tempReturn := []string{"There was an issue."}
