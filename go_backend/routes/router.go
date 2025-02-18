@@ -310,7 +310,8 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 			log.Fatalf("Error unmarshalling JSON: %v", err)
 		}
 
-		var totalGenresList []string
+		totalGenresMap := make(map[string]struct{})
+		totalGenresList := []string{}
 		for _, eachTrack := range Album.Items {
 			// create get request to link
 			// https://open.spotify.com/track/5mCPDVBb16L4XQwDdbRUpz?si=7b16415c950a4448
@@ -380,7 +381,9 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 				if err != nil {
 					log.Fatalf("Error unmarshalling JSON: %v", err)
 				}
-				totalGenresList = append(totalGenresList, Artist.Genres...)
+				for _, eachItem := range Artist.Genres {
+					addUnique(totalGenresMap, eachItem, &totalGenresList)
+				}
 			}
 		}
 		println("Genres: ", strings.Join(totalGenresList, ", "))
@@ -421,7 +424,8 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 			log.Fatalf("Error unmarshalling JSON: %v", err)
 		}
 
-		var totalGenresList []string
+		totalGenresMap := make(map[string]struct{})
+		totalGenresList := []string{}
 		for _, eachTrack := range Playlist.TrackList {
 			// create get request to link
 			// https://open.spotify.com/track/5mCPDVBb16L4XQwDdbRUpz?si=7b16415c950a4448
@@ -491,7 +495,9 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 				if err != nil {
 					log.Fatalf("Error unmarshalling JSON: %v", err)
 				}
-				totalGenresList = append(totalGenresList, Artist.Genres...)
+				for _, eachItem := range Artist.Genres {
+					addUnique(totalGenresMap, eachItem, &totalGenresList)
+				}
 			}
 		}
 		println("Genres: ", strings.Join(totalGenresList, ", "))
@@ -499,4 +505,11 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 	}
 	tempReturn := []string{"There was an issue."}
 	return tempReturn
+}
+
+func addUnique(uniqueSet map[string]struct{}, item string, finalList *[]string) {
+	if _, exists := uniqueSet[item]; !exists {
+		uniqueSet[item] = struct{}{}
+		*finalList = append(*finalList, item)
+	}
 }
