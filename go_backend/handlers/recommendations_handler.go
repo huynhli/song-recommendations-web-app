@@ -12,22 +12,24 @@ import (
 
 func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// if an error occured
-	returnedGenresAndToken := GetGenreAPI(c)
-	if strings.HasPrefix(returnedGenresAndToken[0][0], "This") {
-		return c.JSON(returnedGenresAndToken[0])
+	returnedGenres, token := GetGenreAPI(c)
+	if strings.HasPrefix(returnedGenres[0], "This") {
+		return c.JSON(returnedGenres[0])
 	}
 
 	// else, get recommendations!
 	// TODO this is deprecated -> find a new way to do this
 	// TODO before fixing because of deprecation -> get recommendations based on tracks, artists.
 	// genres is kinda generalized and somehow not that supported for lots of spotify things
-	recommendations := []string{}
-	for _, eachGenre := range returnedGenresAndToken[0] {
+
+	totalSongsMap := make(map[string]struct{})
+	totalSongsList := []string{}
+	for _, eachGenre := range returnedGenres {
 		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/recommendations?seed_genres="+strings.ReplaceAll(eachGenre, " ", "-"), nil)
 		if err != nil {
 			log.Fatalf("Error getting recommendations: ", err)
 		}
-		req.Header.Set("Authorization", "Bearer "+returnedGenresAndToken[1])
+		req.Header.Set("Authorization", "Bearer "+token)
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -53,16 +55,19 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			log.Fatalf("Error unmarshalling: %v", err)
 		}
 
-		totalSongsMap := make(map[string]struct{})
-		totalSongsList := []string{}
 		for index, eachTrack := range Recommendations.Tracks {
 			var ArtistList = ""
-			for _, eachArtist := range Recommendations.Tracks[index].Artists {
-
+			for indexArtist, eachArtist := range Recommendations.Tracks[index].Artists {
+				if indexArtist == 0 {
+					ArtistList = ArtistList + " by " + eachArtist.ArtistName
+					continue
+				}
+				ArtistList = ArtistList + " + " + eachArtist.ArtistName
 			}
-			addUnique(totalSongsMap, Recommendations.Tracks[index].Name+" "+ArtistList, &totalSongsList)
+			addUnique(totalSongsMap, eachTrack.Name+" "+ArtistList, &totalSongsList)
 		}
 
 	}
+	return c.JSON(totalSongsList)
 
 }
