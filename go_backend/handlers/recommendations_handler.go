@@ -27,7 +27,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	for _, eachGenre := range returnedGenres {
 		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/recommendations?seed_genres="+strings.ReplaceAll(eachGenre, " ", "-"), nil)
 		if err != nil {
-			log.Fatalf("Error getting recommendations: ", err)
+			log.Fatalf("Error getting recommendations: %v", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 
