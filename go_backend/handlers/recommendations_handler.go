@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// if an error occured
 	returnedGenres, token := GetGenreAPI(c)
+	fmt.Println(returnedGenres, token)
+
 	if strings.HasPrefix(returnedGenres[0], "This") {
 		return c.JSON(returnedGenres[0])
 	}

@@ -23,3 +23,15 @@ func getGenres(c *fiber.Ctx) error {
 	data := []string{"pop", "jazz", "blues", "rock"}
 	return c.JSON(data)
 }
+
+// func getGenreAPI(c *fiber.Ctx) error {
+// 	link := c.Query("link")
+// 	tempList := []string{"This is a valid link.", "This is not a valid link. Try again."}
+// 	if link == "" {
+// 		return c.JSON(tempList[1:])
+// 	}
+
+// 	// authOptions = []string{}
+
+// 	return c.JSON(tempList[:1])
+// }

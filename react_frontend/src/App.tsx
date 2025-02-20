@@ -27,7 +27,7 @@ function App() {
 
   const handleAPI = async () => {
     try {
-      const response = await fetch(`https://song-recommendations-web-app-7jyz.onrender.com/api/data?link=${link}`)
+      const response = await fetch(`http://localhost:8080/api/data?link=${link}`)
       const data = await response.json();
       setGenreAPI(data)
     } catch (error) {
