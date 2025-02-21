@@ -15,7 +15,9 @@ I then wrote some frontend code/implemented buttons for backend testing, impleme
 
 Implementation for recommendations was done next in a seperate handler file, taking in a list of genres and returning a list of track names and 
 their corresponding arists.
+- For this step, I tried: get recommendations endpoint, get categories and get playlists based on categories, and even get artists related to artist. All these options are deprecated and have little-to-no return data that I could use.
+- Thus, I'm hardcoding playlists for each genre. Ideally the links are stored in some kind of SQL database, but for brevity I devided to write a large switch statement that it chooses songs from. 
 
-Finally it gets displayed in the frontend dynamically with scroll panes.
+Finally, the recommended songs get displayed in the frontend dynamically with scroll panes.
 
 Thanks for checking out my project! Check out my Github profile if you'd like to see more things like this in the future!

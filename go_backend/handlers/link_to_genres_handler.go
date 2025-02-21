@@ -20,7 +20,7 @@ type TokenResponse struct {
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-func GetGenreAPI(c *fiber.Ctx) ([]string, string) {
+func GetGenreFromAPI(c *fiber.Ctx) ([]string, string) {
 	link := c.Query("link")
 
 	typeOf := ""
@@ -347,9 +347,7 @@ func artistCase(spotifyID string, accessToken string, Artist *struct {
 	Genres []string "json:\"genres\""
 }) []string {
 	body := apiCall("artists", spotifyID, accessToken)
-	fmt.Println("body is: ", body)
 	artistToGenres(body, Artist)
-	fmt.Println("body is: ", body)
 	return Artist.Genres
 }
 
