@@ -30,8 +30,9 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	for _, eachGenre := range returnedGenres {
 		switch eachGenre {
 		case "rap":
+			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=5776c11ba60d4868
 			// https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd?si=c66a76c2239f40de
-			playlistIDs = append(playlistIDs, "37i9dQZF1DX0XUsuxWHRQd")
+			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
 			supportedGenresList = append(supportedGenresList, "rap")
 		case "hip hop":
 			playlistIDs = append(playlistIDs, "")
