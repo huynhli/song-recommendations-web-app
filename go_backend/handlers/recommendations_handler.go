@@ -15,7 +15,7 @@ import (
 func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// if an error occured
 	returnedGenres, token := GetGenreFromAPI(c)
-
+	fmt.Println("this is returned genres", returnedGenres)
 	if strings.HasPrefix(returnedGenres[0], "This") {
 		return c.JSON(returnedGenres[0])
 	}
@@ -34,7 +34,8 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			playlistIDs = append(playlistIDs, "37i9dQZF1DX0XUsuxWHRQd")
 			supportedGenresList = append(supportedGenresList, "rap")
 		case "hip hop":
-			playlistIDs = append(playlistIDs, "")
+			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=0fba70e46e2742b9
+			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
 			supportedGenresList = append(supportedGenresList, "hip hop")
 		case "pop":
 			playlistIDs = append(playlistIDs, "")
@@ -87,8 +88,8 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// 	addUnique(totalSongsMap, eachTrack.Name+" "+ArtistList, &totalSongsList)
 	// }
 	for _, eachPlaylistId := range playlistIDs {
-		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks", nil)
-		fmt.Println("url is: ", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?limit=5")
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5", nil)
+		fmt.Println("url is: ", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5")
 		if err != nil {
 			log.Fatalf("Error getting recommendations: %v", err)
 		}
@@ -125,6 +126,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 
 		for _, eachItem := range Playlist.Items {
 			var ArtistList = ""
+			fmt.Println("track name: ", eachItem.TrackObject.Name)
 			for indexArtist, eachArtist := range eachItem.TrackObject.Artists {
 				if indexArtist == 0 {
 					ArtistList = ArtistList + " by " + eachArtist.Name
@@ -132,7 +134,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 				}
 				ArtistList = ArtistList + " + " + eachArtist.Name
 			}
-			addUnique(totalSongsMap, eachItem.Name+" "+ArtistList, &totalSongsList)
+			addUnique(totalSongsMap, eachItem.TrackObject.Name+" "+ArtistList+" ", &totalSongsList)
 		}
 	}
 
@@ -141,6 +143,6 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	returnedGenres = append(returnedGenres, strconv.Itoa(returnedLength))
 	fmt.Println(totalSongsList)
 	fmt.Println(returnedGenres)
-	return c.JSON(returnedGenres)
+	return c.JSON(totalSongsList)
 
 }

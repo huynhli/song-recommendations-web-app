@@ -157,6 +157,7 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 			Genres []string `json:"genres"`
 		}
 		fmt.Println("in artist switch")
+		fmt.Println("returning: ", artistCase(spotifyID, accessToken, &Artist))
 		return artistCase(spotifyID, accessToken, &Artist)
 
 	case "track":
