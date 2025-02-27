@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
@@ -43,33 +41,27 @@ function App() {
 
 
   return (
-    <>
+    <div className="bg-blue-300 min-h-screen flex justify-center items-center">
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <input
-          type="text"
-          value={link}
-          onChange={handleLinkChange} // Update state as user types
-          placeholder="Enter link"
-        />
-        <button onClick={handleAPI}>Click here for genres</button>
-        <p>{genreAPI} here is API</p>
-        <button onClick={handleClick}>Click here for genres</button>
-        <p>{genreList} here</p>
+        <h1>Vite + React</h1>
+        <div className="card">
+          <input
+            type="text"
+            value={link}
+            onChange={handleLinkChange} // Update state as user types
+            placeholder="Enter link"
+          />
+          <button onClick={handleAPI}>Click here for genres</button>
+          <p>{genreAPI} here is API</p>
+          <button onClick={handleClick}>Click here for genres</button>
+          <p>{genreList} here</p>
 
+        </div>
+        <p className="read-the-docs">
+          Click on the Vite and React logos to learn more
+        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 

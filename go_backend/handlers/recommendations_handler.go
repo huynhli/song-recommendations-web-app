@@ -28,6 +28,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	supportedGenresList := []string{}
 	playlistIDs := []string{}
 	for _, eachGenre := range returnedGenres {
+		// TODO throw playlist links in a file and call dynamically
 		switch eachGenre {
 		case "rap":
 			// https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd?si=c66a76c2239f40de
