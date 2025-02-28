@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import React from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import './App.css'
-import Header from './Header'
-import Footer from './Footer'
-import GeneratorPage from './GeneratorPage';
-import DocsPage from './DocsPage';
+import Header from './pages_or_components/Header'
+import Footer from './pages_or_components/Footer'
+import GeneratorPage from './pages_or_components/GeneratorPage';
+import DocsPage from './pages_or_components/DocsPage';
 
 export default function App() {
   // defining default layout
