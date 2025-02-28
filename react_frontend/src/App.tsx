@@ -23,8 +23,8 @@ export default function App() {
     <div>
       <Routes>
         <Route path="/" element={<Layout />}>
-            <Route path="/page" element={<GeneratorPage />} />
-
+            <Route path="/" element={<GeneratorPage />} />
+            <Route path="/docs" element={<DocsPage />} />
         </Route>
       </Routes>
     </div>
