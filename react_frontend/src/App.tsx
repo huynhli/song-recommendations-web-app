@@ -44,6 +44,7 @@ function App() {
     <div className="bg-blue-300 min-h-screen flex justify-center items-center">
       <div>
         <h1>Vite + React</h1>
+        <h1 className="text-3xl font-bold underline">Hello yall</h1>
         <div className="card">
           <input
             type="text"
