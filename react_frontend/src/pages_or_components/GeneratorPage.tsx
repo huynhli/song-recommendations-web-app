@@ -39,12 +39,12 @@ export default function GeneratorPage() {
         <div></div>
       </div>
       <div className="bg-blue-700 min-h-20 flex justify-center items-center">
-        <p className="text-white">
+        <p className="text-white text-center">
           {genreAPI.length === 0
             ? ""
             : genreAPI.length === 1
             ? genreAPI[0]
-            : `Genres found: ${genreAPI[genreAPI.length-2]}\nSupported genres: ${genreAPI[genreAPI.length-1]}\nRecommendations are:`}
+            : <>Genres found: {genreAPI[genreAPI.length-2]}<br />Supported genres: {genreAPI[genreAPI.length-1]}<br />Recommendations are:</>}
         </p>
       </div>
       <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
