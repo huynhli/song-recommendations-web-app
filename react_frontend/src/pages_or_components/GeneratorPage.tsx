@@ -21,12 +21,12 @@ export default function GeneratorPage() {
   }
 
   return (
-    <div className="bg-blue-700 min-h-[calc(100vh-120px)] flex flex-col justify-center items-center">
-      <div>
+    <div className="bg-blue-700 min-h-[calc(100vh-120px)] flex flex-col justify-start items-center">
+      <div className='border-t-100 border-blue-700'>
         <h1 className="text-7xl text-white font-bold pt-20 pb-6">Song Recs</h1>
         <p className='text-white text-center italic pb-6'>For more information, visit the Docs page.</p>
       </div>
-      <div className='bg-blue-700 border-b-10 border-blue-700 flex'>
+      <div className='bg-blue-700 border-b-4 border-blue-700 flex'>
         <input className='bg-white rounded-lg focus:outline-none focus:ring-0 w-100 px-4'
           type="text"
           value={link}
@@ -34,14 +34,21 @@ export default function GeneratorPage() {
           placeholder="Enter a spotify link here"
         />
         <div className='bg-blue-700 min-w-20'></div>
-        <button onClick={handleAPI} className='rounded-lg bg-white px-3 py-2 hover:cursor-pointer'>Click here for genres</button>
+        <button onClick={handleAPI} className='rounded-lg bg-white px-3 py-2 
+        hover:cursor-pointer active:bg-slate-300'>Click here for genres</button>
         <div></div>
       </div>
-      <div className='bg-blue-700 min-h-20 flex justify-center items-center'>
-        <p className='text-white'>{genreAPI}</p>
+      <div className="bg-blue-700 min-h-20 flex justify-center items-center">
+        <p className="text-white">
+          {genreAPI.length === 0
+            ? ""
+            : genreAPI.length === 1
+            ? genreAPI[0]
+            : `Genres found: ${genreAPI[genreAPI.length-2]}\nSupported genres: ${genreAPI[genreAPI.length-1]}\nRecommendations are:`}
+        </p>
       </div>
       <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
-        {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 1 }).map((_, index) => (
+        {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 2 }).map((_, index) => (
           <div className="bg-white py-4 text-center" key={index}>
             <p>{genreAPI[index]}</p>
           </div>

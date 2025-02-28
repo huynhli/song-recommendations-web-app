@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,8 +13,10 @@ import (
 func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// if an error occured
 	returnedGenres, token := GetGenreFromAPI(c)
-	fmt.Println("this is returned genres", returnedGenres)
-	if strings.HasPrefix(returnedGenres[0], "This") {
+	if len(returnedGenres) == 0 {
+		temp := []string{"This artist/track/album has not been categorized by Spotify. Or, the playlist you entered does not have any tracks."}
+		return c.JSON(temp)
+	} else if strings.HasPrefix(returnedGenres[0], "This") {
 		return c.JSON(returnedGenres)
 	}
 	// else, get recommendations!
@@ -46,51 +46,9 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			supportedGenresList = append(supportedGenresList, "rock")
 		}
 	}
-	// req, err := http.NewRequest("GET", "https://api.spotify.com/v1/recommendations?seed_genres="+strings.ReplaceAll(eachGenre, " ", "-"), nil)
-	// if err != nil {
-	// 	log.Fatalf("Error getting recommendations: %v", err)
-	// }
-	// req.Header.Set("Authorization", "Bearer "+token)
 
-	// client := &http.Client{}
-	// resp, err := client.Do(req)
-	// if err != nil {
-	// 	log.Fatalf("Error sending request: %v", err)
-	// }
-	// defer resp.Body.Close()
-
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatalf("Error reading response body: %v", err)
-	// }
-	// var Recommendations struct {
-	// 	Tracks []struct {
-	// 		Artists []struct {
-	// 			Name string `json:"name"`
-	// 		} `json:"artists"`
-	// 		Name string `json:"name"`
-	// 	} `json:"tracks"`
-	// }
-
-	// err = json.Unmarshal(body, &Recommendations)
-	// if err != nil {
-	// 	log.Fatalf("Error unmarshalling: %v", err)
-	// }
-
-	// for index, eachTrack := range Recommendations.Tracks {
-	// 	var ArtistList = ""
-	// 	for indexArtist, eachArtist := range Recommendations.Tracks[index].Artists {
-	// 		if indexArtist == 0 {
-	// 			ArtistList = ArtistList + " by " + eachArtist.Name
-	// 			continue
-	// 		}
-	// 		ArtistList = ArtistList + " + " + eachArtist.Name
-	// 	}
-	// 	addUnique(totalSongsMap, eachTrack.Name+" "+ArtistList, &totalSongsList)
-	// }
 	for _, eachPlaylistId := range playlistIDs {
 		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5", nil)
-		fmt.Println("url is: ", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5")
 		if err != nil {
 			log.Fatalf("Error getting recommendations: %v", err)
 		}
@@ -123,11 +81,9 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 		if err != nil {
 			log.Fatalf("Error unmarshalling: %v", err)
 		}
-		fmt.Println("body is:", string(body))
 
 		for _, eachItem := range Playlist.Items {
 			var ArtistList = ""
-			fmt.Println("track name: ", eachItem.TrackObject.Name)
 			for indexArtist, eachArtist := range eachItem.TrackObject.Artists {
 				if indexArtist == 0 {
 					ArtistList = ArtistList + " by " + eachArtist.Name
@@ -138,13 +94,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			addUnique(totalSongsMap, eachItem.TrackObject.Name+" "+ArtistList+" ", &totalSongsList)
 		}
 	}
-
-	returnedLength := len(returnedGenres)
-	returnedGenres = append(returnedGenres, supportedGenresList...)
-	returnedGenres = append(returnedGenres, strconv.Itoa(returnedLength))
-	fmt.Println(totalSongsList)
-	fmt.Println(returnedGenres)
-	totalSongsList = append(totalSongsList, )
+	totalSongsList = append(totalSongsList, strings.Join(returnedGenres, ", ")+".", strings.Join(supportedGenresList, ", ")+".")
 	return c.JSON(totalSongsList)
 
 }
