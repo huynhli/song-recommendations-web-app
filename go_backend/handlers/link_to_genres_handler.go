@@ -42,6 +42,7 @@ func GetGenreFromAPI(c *fiber.Ctx) ([]string, string) {
 
 		// make api request, return json data -> genres, artists, artists top tracks
 		returningData := apiRequest(accessToken, spotifyID.String(), typeOf)
+		fmt.Println(accessToken, spotifyID.String(), typeOf)
 		fmt.Println(returningData, accessToken)
 		return returningData, accessToken
 	}
@@ -183,31 +184,23 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 
 	case "album":
 		var Album struct {
-			Items []struct {
-				TrackID string `json:"id"`
-			} `json:"items"`
+			Artists []struct {
+				ID string `json:"id"`
+			} `json:"artists"`
 		}
 		albumCase(spotifyID, accessToken, &Album)
 
+		fmt.Println("Album")
+
 		totalGenresMap := make(map[string]struct{})
 		totalGenresList := []string{}
-		for _, eachTrack := range Album.Items {
-			var Track struct {
-				Artists []struct {
-					ArtistID string `json:"id"`
-				} `json:"artists"`
-				IsLocal bool `json:"is_local"`
+		for _, eachArtist := range Album.Artists {
+			var Artist struct {
+				Genres []string `json:"genres"`
 			}
-			shouldReturn, result := validateTrack(&eachTrack, accessToken, Track)
-			if shouldReturn {
-				return result
-			}
-
-			for _, eachArtist := range Track.Artists {
-				var Artist struct {
-					Genres []string `json:"genres"`
-				}
-				albumCaseNestedTwice(&eachArtist, accessToken, Artist, totalGenresMap, totalGenresList)
+			artistCase(eachArtist.ID, accessToken, &Artist)
+			for _, eachGenre := range Artist.Genres {
+				addUnique(totalGenresMap, eachGenre, &totalGenresList)
 			}
 		}
 		return totalGenresList
@@ -302,9 +295,9 @@ func validateTrack(eachTrack *struct {
 }
 
 func albumCase(spotifyID string, accessToken string, Album *struct {
-	Items []struct {
-		TrackID string "json:\"id\""
-	} "json:\"items\""
+	Artists []struct {
+		ID string `json:"id"`
+	} `json:"artists"`
 }) {
 	body := apiCall("albums", spotifyID, accessToken)
 	var err = json.Unmarshal(body, &Album)

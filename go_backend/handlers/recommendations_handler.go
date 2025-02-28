@@ -17,7 +17,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	returnedGenres, token := GetGenreFromAPI(c)
 	fmt.Println("this is returned genres", returnedGenres)
 	if strings.HasPrefix(returnedGenres[0], "This") {
-		return c.JSON(returnedGenres[0])
+		return c.JSON(returnedGenres)
 	}
 	// else, get recommendations!
 	// TODO this is deprecated -> find a new way to do this
@@ -144,6 +144,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	returnedGenres = append(returnedGenres, strconv.Itoa(returnedLength))
 	fmt.Println(totalSongsList)
 	fmt.Println(returnedGenres)
+	totalSongsList = append(totalSongsList, )
 	return c.JSON(totalSongsList)
 
 }

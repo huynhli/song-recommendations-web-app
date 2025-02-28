@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import '../App.css'
 
 export default function GeneratorPage() {
-  const [genreList, setGenreList] = useState<string[]>([]);
-  const [showGenres, setShowGenres] = useState(false)
   const [genreAPI, setGenreAPI] = useState<string[]>([]);
   const [link, setLink] = useState("");
 
@@ -12,9 +10,6 @@ export default function GeneratorPage() {
       const response = await fetch(`http://localhost:8080/api/data?link=${link}`)
       const data = await response.json();
       setGenreAPI(data)
-      if (genreAPI.length > 1) {
-        setShowGenres(!showGenres)
-      }
     } catch (error) {
       console.error('Error fetching: ', error)
     }
@@ -46,28 +41,11 @@ export default function GeneratorPage() {
         <p className='text-white'>{genreAPI}</p>
       </div>
       <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        <div className="bg-white py-4 text-center">
-          <p>{genreAPI}</p>
-        </div>
-        
+        {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 1 }).map((_, index) => (
+          <div className="bg-white py-4 text-center" key={index}>
+            <p>{genreAPI[index]}</p>
+          </div>
+        ))}
       </div>
     </div>
   )
