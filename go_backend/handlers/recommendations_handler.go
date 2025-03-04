@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -58,18 +60,53 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	}
 
 	for _, eachPlaylistId := range playlistIDs {
-		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5", nil)
+		// getting offset num
+		reqNum, errNum := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId, nil)
+		if errNum != nil {
+			log.Fatalf("Error getting playlist: %v", errNum)
+		}
+		reqNum.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{}
+		respNum, errNum := client.Do(reqNum)
+		if errNum != nil {
+			log.Fatalf("Error sending request: %v", errNum)
+		}
+		defer respNum.Body.Close()
+
+		bodyNum, errNum := io.ReadAll(respNum.Body)
+		if errNum != nil {
+			log.Fatalf("Error reading response body: %v", errNum)
+		}
+		var Result struct {
+			Tracks struct {
+				Total int `json:"total"`
+			} `json:"tracks"`
+		}
+
+		errNum = json.Unmarshal(bodyNum, &Result)
+		if errNum != nil {
+			log.Fatalf("Error unmarshalling: %v", errNum)
+		}
+
+		// calculate offset
+		offset := rand.Intn(Result.Tracks.Total - 5)
+		if Result.Tracks.Total <= 5 {
+			offset = 0
+		}
+
+		// fetching tracks
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset="+strconv.Itoa(offset)+"&limit=5", nil)
 		if err != nil {
 			log.Fatalf("Error getting recommendations: %v", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+token)
 
-		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Fatalf("Error sending request: %v", err)
 		}
-		defer resp.Body.Close()
+		defer respNum.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
