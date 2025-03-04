@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"go_backend/config"
 	"io"
 	"log"
@@ -34,7 +33,7 @@ func GetGenreFromAPI(c *fiber.Ctx) ([]string, string) {
 		}
 
 		// if no assignment, link is broken, return so
-		if typeOf == "" || spotifyID.Len() == 0 {
+		if typeOf == "" || spotifyID.Len() != 22 {
 			return tempList[2:3], ""
 		}
 		// link is good, so make token for api
@@ -42,7 +41,6 @@ func GetGenreFromAPI(c *fiber.Ctx) ([]string, string) {
 
 		// make api request, return json data -> genres, artists, artists top tracks
 		returningData := apiRequest(accessToken, spotifyID.String(), typeOf)
-		fmt.Println(returningData, accessToken)
 		return returningData, accessToken
 	}
 
@@ -52,6 +50,9 @@ func GetGenreFromAPI(c *fiber.Ctx) ([]string, string) {
 func decideTypeOfAPICall(link string, typeOf string, spotifyID *strings.Builder) string {
 	if strings.Contains(link[25:], "artist") {
 		typeOf = "artist"
+		if len(link) < 32 {
+			return ""
+		}
 		for _, each := range link[32:] {
 			if each == '?' {
 				break
@@ -60,6 +61,9 @@ func decideTypeOfAPICall(link string, typeOf string, spotifyID *strings.Builder)
 		}
 	} else if strings.Contains(link[25:], "track") {
 		typeOf = "track"
+		if len(link) < 31 {
+			return ""
+		}
 		for _, each := range link[31:] {
 			if each == '?' {
 				break
@@ -68,6 +72,9 @@ func decideTypeOfAPICall(link string, typeOf string, spotifyID *strings.Builder)
 		}
 	} else if strings.Contains(link[25:], "album") {
 		typeOf = "album"
+		if len(link) < 31 {
+			return ""
+		}
 		for _, each := range link[31:] {
 			if each == '?' {
 				break
@@ -76,6 +83,9 @@ func decideTypeOfAPICall(link string, typeOf string, spotifyID *strings.Builder)
 		}
 	} else if strings.Contains(link[25:], "playlist") {
 		typeOf = "playlist"
+		if len(link) < 34 {
+			return ""
+		}
 		for _, each := range link[34:] {
 			if each == '?' {
 				break
@@ -156,7 +166,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 		var Artist struct {
 			Genres []string `json:"genres"`
 		}
-		fmt.Println("in artist switch")
 		return artistCase(spotifyID, accessToken, &Artist)
 
 	case "track":
@@ -182,31 +191,21 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 
 	case "album":
 		var Album struct {
-			Items []struct {
-				TrackID string `json:"id"`
-			} `json:"items"`
+			Artists []struct {
+				ID string `json:"id"`
+			} `json:"artists"`
 		}
 		albumCase(spotifyID, accessToken, &Album)
 
 		totalGenresMap := make(map[string]struct{})
 		totalGenresList := []string{}
-		for _, eachTrack := range Album.Items {
-			var Track struct {
-				Artists []struct {
-					ArtistID string `json:"id"`
-				} `json:"artists"`
-				IsLocal bool `json:"is_local"`
+		for _, eachArtist := range Album.Artists {
+			var Artist struct {
+				Genres []string `json:"genres"`
 			}
-			shouldReturn, result := validateTrack(&eachTrack, accessToken, Track)
-			if shouldReturn {
-				return result
-			}
-
-			for _, eachArtist := range Track.Artists {
-				var Artist struct {
-					Genres []string `json:"genres"`
-				}
-				albumCaseNestedTwice(&eachArtist, accessToken, Artist, totalGenresMap, totalGenresList)
+			artistCase(eachArtist.ID, accessToken, &Artist)
+			for _, eachGenre := range Artist.Genres {
+				addUnique(totalGenresMap, eachGenre, &totalGenresList)
 			}
 		}
 		return totalGenresList
@@ -267,18 +266,6 @@ func playlistCase(spotifyID string, accessToken string, Playlist *struct {
 	}
 }
 
-func albumCaseNestedTwice(eachArtist *struct {
-	ArtistID string "json:\"id\""
-}, accessToken string, Artist struct {
-	Genres []string "json:\"genres\""
-}, totalGenresMap map[string]struct{}, totalGenresList []string) {
-	body := apiCall("artists", eachArtist.ArtistID, accessToken)
-	artistToGenres(body, &Artist)
-	for _, eachItem := range Artist.Genres {
-		addUnique(totalGenresMap, eachItem, &totalGenresList)
-	}
-}
-
 func validateTrack(eachTrack *struct {
 	TrackID string "json:\"id\""
 }, accessToken string, Track struct {
@@ -301,9 +288,9 @@ func validateTrack(eachTrack *struct {
 }
 
 func albumCase(spotifyID string, accessToken string, Album *struct {
-	Items []struct {
-		TrackID string "json:\"id\""
-	} "json:\"items\""
+	Artists []struct {
+		ID string `json:"id"`
+	} `json:"artists"`
 }) {
 	body := apiCall("albums", spotifyID, accessToken)
 	var err = json.Unmarshal(body, &Album)

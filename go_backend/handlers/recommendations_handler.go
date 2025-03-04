@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,9 +13,11 @@ import (
 func GetRecommendationsAPI(c *fiber.Ctx) error {
 	// if an error occured
 	returnedGenres, token := GetGenreFromAPI(c)
-
-	if strings.HasPrefix(returnedGenres[0], "This") {
-		return c.JSON(returnedGenres[0])
+	if len(returnedGenres) == 0 {
+		temp := []string{"This artist/track/album has not been categorized by Spotify. Or, the playlist you entered does not have any tracks."}
+		return c.JSON(temp)
+	} else if strings.HasPrefix(returnedGenres[0], "This") {
+		return c.JSON(returnedGenres)
 	}
 	// else, get recommendations!
 	// TODO this is deprecated -> find a new way to do this
@@ -28,6 +28,7 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 	supportedGenresList := []string{}
 	playlistIDs := []string{}
 	for _, eachGenre := range returnedGenres {
+		// TODO throw playlist links in a file and call dynamically
 		switch eachGenre {
 		case "rap":
 			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=5776c11ba60d4868
@@ -35,7 +36,8 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
 			supportedGenresList = append(supportedGenresList, "rap")
 		case "hip hop":
-			playlistIDs = append(playlistIDs, "")
+			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=0fba70e46e2742b9
+			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
 			supportedGenresList = append(supportedGenresList, "hip hop")
 		case "pop":
 			playlistIDs = append(playlistIDs, "")
@@ -45,51 +47,9 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			supportedGenresList = append(supportedGenresList, "rock")
 		}
 	}
-	// req, err := http.NewRequest("GET", "https://api.spotify.com/v1/recommendations?seed_genres="+strings.ReplaceAll(eachGenre, " ", "-"), nil)
-	// if err != nil {
-	// 	log.Fatalf("Error getting recommendations: %v", err)
-	// }
-	// req.Header.Set("Authorization", "Bearer "+token)
 
-	// client := &http.Client{}
-	// resp, err := client.Do(req)
-	// if err != nil {
-	// 	log.Fatalf("Error sending request: %v", err)
-	// }
-	// defer resp.Body.Close()
-
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatalf("Error reading response body: %v", err)
-	// }
-	// var Recommendations struct {
-	// 	Tracks []struct {
-	// 		Artists []struct {
-	// 			Name string `json:"name"`
-	// 		} `json:"artists"`
-	// 		Name string `json:"name"`
-	// 	} `json:"tracks"`
-	// }
-
-	// err = json.Unmarshal(body, &Recommendations)
-	// if err != nil {
-	// 	log.Fatalf("Error unmarshalling: %v", err)
-	// }
-
-	// for index, eachTrack := range Recommendations.Tracks {
-	// 	var ArtistList = ""
-	// 	for indexArtist, eachArtist := range Recommendations.Tracks[index].Artists {
-	// 		if indexArtist == 0 {
-	// 			ArtistList = ArtistList + " by " + eachArtist.Name
-	// 			continue
-	// 		}
-	// 		ArtistList = ArtistList + " + " + eachArtist.Name
-	// 	}
-	// 	addUnique(totalSongsMap, eachTrack.Name+" "+ArtistList, &totalSongsList)
-	// }
 	for _, eachPlaylistId := range playlistIDs {
-		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks", nil)
-		fmt.Println("url is: ", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?limit=5")
+		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset=0&limit=5", nil)
 		if err != nil {
 			log.Fatalf("Error getting recommendations: %v", err)
 		}
@@ -122,7 +82,6 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 		if err != nil {
 			log.Fatalf("Error unmarshalling: %v", err)
 		}
-		fmt.Println("body is:", string(body))
 
 		for _, eachItem := range Playlist.Items {
 			var ArtistList = ""
@@ -133,15 +92,10 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 				}
 				ArtistList = ArtistList + " + " + eachArtist.Name
 			}
-			addUnique(totalSongsMap, eachItem.Name+" "+ArtistList, &totalSongsList)
+			addUnique(totalSongsMap, eachItem.TrackObject.Name+" "+ArtistList+" ", &totalSongsList)
 		}
 	}
-
-	returnedLength := len(returnedGenres)
-	returnedGenres = append(returnedGenres, supportedGenresList...)
-	returnedGenres = append(returnedGenres, strconv.Itoa(returnedLength))
-	fmt.Println(totalSongsList)
-	fmt.Println(returnedGenres)
-	return c.JSON(returnedGenres)
+	totalSongsList = append(totalSongsList, strings.Join(returnedGenres, ", ")+".", strings.Join(supportedGenresList, ", ")+".")
+	return c.JSON(totalSongsList)
 
 }
