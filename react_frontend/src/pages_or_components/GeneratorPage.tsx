@@ -7,7 +7,8 @@ export default function GeneratorPage() {
 
   const handleAPI = async () => {
     try {
-      const response = await fetch(`https://song-recommendations-web-app-7jyz.onrender.com/api/data?link=${link}`)
+      // const response = await fetch(`https://song-recommendations-web-app-7jyz.onrender.com/api/data?link=${link}`)
+      const response = await fetch(`http://localhost:8080/api/data?link=${link}`)
       const data = await response.json();
       setGenreAPI(data)
     } catch (error) {
@@ -35,7 +36,7 @@ export default function GeneratorPage() {
         />
         <div className='bg-blue-700 min-w-20'></div>
         <button onClick={handleAPI} className='rounded-lg bg-white px-3 py-2 
-        hover:cursor-pointer active:bg-slate-300'>Click here for genres</button>
+        hover:cursor-pointer hover:bg-slate-300 active:bg-slate-400'>Click here for genres</button>
         <div></div>
       </div>
       <div className="bg-blue-700 min-h-20 flex justify-center items-center">
