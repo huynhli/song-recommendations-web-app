@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"go_backend/config"
 	"io"
 	"log"
@@ -161,7 +160,6 @@ func apiRequest(accessToken string, spotifyID string, typeOf string) []string {
 	// else given playlist:
 	//    find artists most frequently occuring -> dict, save top frequent 10 genres -> dict
 	// then, find genres of browse playlist if exist
-	fmt.Println("In api request")
 	switch typeOf {
 	case "artist":
 		var Artist struct {
