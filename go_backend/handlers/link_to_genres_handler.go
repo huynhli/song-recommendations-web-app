@@ -269,27 +269,6 @@ func playlistCase(spotifyID string, accessToken string, Playlist *struct {
 	}
 }
 
-func validateTrack(eachTrack *struct {
-	ID string "json:\"id\""
-}, accessToken string, Track struct {
-	Artists []struct {
-		ArtistID string "json:\"id\""
-	} "json:\"artists\""
-	IsLocal bool "json:\"is_local\""
-}) (bool, []string) {
-	body := apiCall("tracks", eachTrack.ID, accessToken)
-	var err = json.Unmarshal(body, &Track)
-	if err != nil {
-		log.Fatalf("Error unmarshalling JSON: %v", err)
-	}
-
-	localReturn := []string{"This is a local track. Try a non-local track."}
-	if Track.IsLocal {
-		return true, localReturn
-	}
-	return false, nil
-}
-
 func artistIDsFromAlbum(spotifyID string, accessToken string, Album *struct {
 	Artists []struct {
 		ID string `json:"id"`

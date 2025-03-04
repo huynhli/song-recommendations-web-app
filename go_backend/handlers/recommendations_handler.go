@@ -31,19 +31,28 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 		// TODO throw playlist links in a file and call dynamically
 		switch eachGenre {
 		case "rap":
-			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=5776c11ba60d4868
-			// https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd?si=c66a76c2239f40de
-			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
+			playlistIDs = append(playlistIDs, "7k8E4tmsRVxLSQitB9bYPQ")
+			playlistIDs = append(playlistIDs, "01MRi9jFGeSEEttKOk7VgR")
+			playlistIDs = append(playlistIDs, "23bBJex1i75b9oqUo6jUCC")
+			playlistIDs = append(playlistIDs, "7JIGfa0KkCTDxUPOQySODP")
 			supportedGenresList = append(supportedGenresList, "rap")
 		case "hip hop":
-			// https://open.spotify.com/playlist/73rtVYCu7hFAUJVrXMdFb3?si=0fba70e46e2742b9
-			playlistIDs = append(playlistIDs, "73rtVYCu7hFAUJVrXMdFb3")
+			playlistIDs = append(playlistIDs, "62y3BHKehWnb1hlaPclDAA")
+			playlistIDs = append(playlistIDs, "5oN7X3cPTUkOJFPmVx5wCE")
+			playlistIDs = append(playlistIDs, "0dMexqq0XIWS3QJ74z3ZhD")
+			playlistIDs = append(playlistIDs, "6WnTjZBYrYOdPl4pK7PyZg")
 			supportedGenresList = append(supportedGenresList, "hip hop")
 		case "pop":
-			playlistIDs = append(playlistIDs, "")
+			playlistIDs = append(playlistIDs, "1WH6WVBwPBz35ZbWsgCpgr")
+			playlistIDs = append(playlistIDs, "3JoHkM90TXzfIS1RMN0Cgd")
+			playlistIDs = append(playlistIDs, "2L2HwKRvUgBv1YetudaRI3")
+			playlistIDs = append(playlistIDs, "2Sxd5BovYwLgRg6KyZOTer")
 			supportedGenresList = append(supportedGenresList, "pop")
 		case "rock":
-			playlistIDs = append(playlistIDs, "")
+			playlistIDs = append(playlistIDs, "1Kgkkup7w9qvGxGJGa75PS")
+			playlistIDs = append(playlistIDs, "77RvyLiqmUimojxq3vg6mY")
+			playlistIDs = append(playlistIDs, "23hD5D7bvXtkJGz2ni7s9e")
+			playlistIDs = append(playlistIDs, "7KahejEXeb27cRJCFt3VFO")
 			supportedGenresList = append(supportedGenresList, "rock")
 		}
 	}
