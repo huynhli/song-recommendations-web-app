@@ -41,19 +41,22 @@ export default function GeneratorPage() {
       </div>
       <div className="bg-blue-700 min-h-20 flex justify-center items-center">
         <p className="text-white text-center">
-          {genreAPI.length === 0
-            ? ""
-            : genreAPI.length === 1
-            ? genreAPI[0]
+          {genreAPI.length === 0 ? ""
+            : genreAPI.length === 1 ? genreAPI[0]
             : <>Genres found: {genreAPI[genreAPI.length-2]}<br />Supported genres: {genreAPI[genreAPI.length-1]}<br />Recommendations are:</>}
         </p>
       </div>
-      <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
-        {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 2 }).map((_, index) => (
-          <div className="bg-white py-4 text-center" key={index}>
-            <p>{genreAPI[index]}</p>
-          </div>
-        ))}
+      <div className='flex flex-row w-full'>
+        <div className='bg-blue-700 w-20 h-20'></div>
+        {/* TODO BUTTONS for each one? */}
+        <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
+          {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 2 }).map((_, index) => (
+            <div className="bg-white py-4 text-center" key={index}>
+              <p>{genreAPI[index]}</p>
+            </div>
+          ))}
+        </div>
+        <div className='bg-blue-700 w-20 h-20'></div>
       </div>
     </div>
   )

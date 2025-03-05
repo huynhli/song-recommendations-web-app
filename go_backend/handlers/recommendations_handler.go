@@ -8,11 +8,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetRecommendationsAPI(c *fiber.Ctx) error {
+	rand.Seed(time.Now().UnixNano())
+
 	// if an error occured
 	returnedGenres, token := GetGenreFromAPI(c)
 	if len(returnedGenres) == 0 {
@@ -89,13 +92,13 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			log.Fatalf("Error unmarshalling: %v", errNum)
 		}
 
-		// calculate offset
+		// calculate offset for this playlist
 		offset := rand.Intn(Result.Tracks.Total - 5)
 		if Result.Tracks.Total <= 5 {
 			offset = 0
 		}
 
-		// fetching tracks
+		// fetching 5 tracks from each playlist with offset
 		req, err := http.NewRequest("GET", "https://api.spotify.com/v1/playlists/"+eachPlaylistId+"/tracks?offset="+strconv.Itoa(offset)+"&limit=5", nil)
 		if err != nil {
 			log.Fatalf("Error getting recommendations: %v", err)
@@ -141,7 +144,24 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 			addUnique(totalSongsMap, eachItem.TrackObject.Name+" "+ArtistList+" ", &totalSongsList)
 		}
 	}
+	// unique songs in the list (no duplicates)
 	totalSongsList = append(totalSongsList, strings.Join(returnedGenres, ", ")+".", strings.Join(supportedGenresList, ", ")+".")
-	return c.JSON(totalSongsList)
 
+	// randomly pick 15
+	songsToDisplay := 16
+	if len(totalSongsList) <= songsToDisplay+2 {
+		return c.JSON(totalSongsList)
+	} else {
+		// fisher yates shuffle (i just learned this)
+
+		n := len(totalSongsList) - 2
+		for i := 0; i < n-1; i++ {
+			j := rand.Intn(n-i) + i
+			totalSongsList[i], totalSongsList[j] = totalSongsList[j], totalSongsList[i] // Swap
+		}
+		listToSend := make([]string, songsToDisplay)
+		copy(listToSend, totalSongsList[:songsToDisplay])
+		listToSend = append(listToSend, totalSongsList[n:]...)
+		return c.JSON(listToSend)
+	}
 }
