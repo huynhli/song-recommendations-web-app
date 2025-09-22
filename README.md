@@ -4,15 +4,6 @@ Have you ever noticed that after listening to Spotify for a while, you get recom
 and recommending songs that *they* like. This can be great, but it can also be repetitive. So, my project looks to use Spotify's recommendation 
 algorithm but without the user-based side of it, utilizing Spotify's Web API.
 
-The back and frontend for this song recommendation website uses Spotify Web API, Golang, and React. Also other frameworks such as Tailwind, Fiber, etc.
-
-This is a React web app with Vite, written in Typescript + SWC.
-It is deployed using Render and Cloudflare Pages.
-
-Working with recommendations was hard:
-- I tried: the get recommendations endpoint, get categories and get playlists based on categories, and even get artists related to artist. All these options are deprecated and have little-to-no return data that I could use.
-- Thus, I hardcoded playlists for each genre. Ideally the links are stored in some kind of database, but for brevity I decided to write a large switch statement that it chooses songs from.
-
-*Note: There are TODOs littered throughout the code for future implementations. Just ignore them lol*
+The back and frontend for this song recommendation website uses Spotify Web API, and more coming soon --> (Last.fm API, MusicBrainz/AcousticBrainz, Discogs API, and Deezer API).
 
 Thanks for checking out my project! Check out my Github profile if you'd like to see more things like this in the future!
