@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import '../App.css'
-import { easeInOut, motion } from "motion/react"
-import { useState } from 'react'
+import { AnimatePresence, easeInOut, motion } from "motion/react"
+import { useContext, useState } from 'react'
 import { delay } from 'motion'
 import MotionLink from './MotionLink'
 
@@ -38,14 +38,14 @@ function Header() {
         >
             <MotionLink
                 className='relative flex flex-row h-full text-4xl text-white font-electrolize' 
-                to='/recsGenerator' 
+                to='/'
                 whileHover="hover" 
                 initial="initial"
                 animate="animate"
                 key="logo-link"
                 >
                  {/* text slide left */}
-                <motion.div className='absolute top-[20px] right-20 h-full origin-right'
+                <motion.div className='absolute top-[16px] right-20 h-full origin-right'
                     transition={{width: {duration: 0.5, ease: easeInOut, delay: 0.2}, opacity: {duration: 0.3, delay: 0.2}}}
                     variants={similarVariant}
                 >
@@ -59,24 +59,73 @@ function Header() {
                     variants={logoVariant}
                 >
                     <img src='/similarSongsLogo.png' className='h-full'/>
-                    <motion.div className='w-30 justify-left'
+                    <motion.div className='w-30 justify-left z-[-10]'
                         variants={ongsVariant}
                     >ongs</motion.div>
                 </motion.div>
-               
             </MotionLink>
             
             <button className='flex justify-center items-center flex-col w-20 h-20 group relative'
                 onClick={() => setNavBarOpen(prev => !prev)}
             >
                 {/* hamburg */}
-                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 translate-y-3 translate-x-2" : ""}`}/>
-                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 -translate-x-2" : ""}`}/>
-                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 -translate-y-3" : ""}`}/>
-
-                {/* navbar */}
-                <nav></nav>
+                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 translate-y-[11px] translate-x-[9px]" : ""}`}/>
+                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 -translate-x-[9px]" : ""}`}/>
+                <div className={`bg-white w-[50%] h-1 m-1 transition-transform duration-600 ${navBarOpen ? "-rotate-270 -translate-y-[13px]" : ""}`}/>
             </button>
+            
+            {/* navbar */}
+            { navBarOpen && 
+                <AnimatePresence>
+                    <motion.nav className='absolute w-full bottom-[-80.2vh] left-0 h-[80vh] px-[10%] bg-[#141b2a] flex flex-col text-4xl z-0'
+                        initial={{ y: "-100%", opacity: 0}}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{y: {duration: 0.2, ease: "easeInOut"}, opacity: {duration: 0.3, ease: "easeIn"}}}
+                        exit={{}}
+                    >
+                        <MotionLink className='flex-1 px-14 mb-2 mt-20 flex items-center hover:font-serif hover:italic text-zinc-300 hover:text-white'
+                            onClick={() => (setNavBarOpen(prev => !prev))}
+                            to='/recsGenerator'
+                            initial={{ y: -100, opacity: 0}}
+                            animate={{ y: 0, opacity: 1}}
+                            transition={{duration: 0.3, ease: easeInOut, delay: 0.3 }}
+                        >
+                            <h1>Recommend a song!</h1>
+                        </MotionLink>
+
+                        <MotionLink className='z-10 flex-1 px-14 my-2 flex items-center hover:font-serif hover:italic text-zinc-300 hover:text-white'
+                            onClick={() => (setNavBarOpen(prev => !prev))}
+                            to='/#About'
+                            initial={{ y: -100, opacity: 0}}
+                            animate={{ y: 0, opacity: 1}}
+                            transition={{duration: 0.3, ease: easeInOut, delay: 0.35 }}
+                        >
+                            About
+                        </MotionLink>
+
+                        <MotionLink className='z-10 flex-1 px-14 my-2 flex items-center hover:font-serif hover:italic text-zinc-300 hover:text-white'
+                            onClick={() => (setNavBarOpen(prev => !prev))}
+                            to='/#Features'
+                            initial={{ y: -100, opacity: 0}}
+                            animate={{ y: 0, opacity: 1}}
+                            transition={{duration: 0.3, ease: easeInOut, delay: 0.4 }}
+                        >
+                            Features
+                        </MotionLink>
+
+                        <MotionLink className='z-10 flex-1 px-14 my-2 flex items-center hover:font-serif hover:italic text-zinc-300 hover:text-white'
+                            onClick={() => (setNavBarOpen(prev => !prev))}
+                            to='/#Contacts'
+                            initial={{ y: -100, opacity: 0}}
+                            animate={{ y: 0, opacity: 1}}
+                            transition={{duration: 0.3, ease: easeInOut, delay: 0.45 }}
+                        >
+                            Contacts
+                        </MotionLink>
+                    </motion.nav>
+                </AnimatePresence>
+            }
+            
         </header>
 
     )

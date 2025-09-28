@@ -1,11 +1,15 @@
 /* App.css */
 /* Body default font */
 body {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Electrolize', sans-serif;
   background-color: #141b2a;
   color: #fff;
 }
 
 .font-electrolize {
   font-family: 'Electrolize', sans-serif;
+}
+
+.font-DMSans{
+  font-family: "DM Sans", sans-serif;
 }

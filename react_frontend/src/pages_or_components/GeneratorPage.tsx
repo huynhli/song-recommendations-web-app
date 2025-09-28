@@ -1,69 +1,130 @@
 import { useEffect, useState } from 'react'
 import '../App.css'
+import { getAlbumRec, getArtistRec, getTrackRec } from './TanstackHelper';
+import { useQuery } from '@tanstack/react-query'
 
 export default function GeneratorPage() {
-  // const [genreAPI, setGenreAPI] = useState<string[]>([]);
+  // useSearchParams for query filtering, pagination, anything that edits teh query
+  // const [searchParams, setSearchParams] = useSearchParams()
+  // const linkQuery = searchParams.get('link')
 
-  // const handleAPI = async () => {
-  //   try {
-  //     const response = await fetch(`https://song-recommendations-web-app-7jyz.onrender.com/api/data?link=${link}`)
-  //     // const response = await fetch(`http://localhost:8080/api/data?link=${link}`)
-  //     const data = await response.json();
-  //     setGenreAPI(data)
-  //   } catch (error) {
-  //     console.error('Error fetching: ', error)
-  //   }
-
-  // }
-
-  // TODO add debouncing
+  const [resourceForQuery, setResourceForQuery] = useState<{ type: string, id: string } | null>(null)
   const [link, setLink] = useState("");
+  // TODO impement debouncing
   const handleLinkChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLink(event.target.value);
   }
 
+  // on page load
+  useEffect(() => {
+    // simple + stateless
+    const url = new URLSearchParams(window.location.search)
+    const linkQuery = url.get('link')
+
+    if (linkQuery){
+      const decodedLink = decodeURIComponent(linkQuery)
+      setLink(decodedLink) // change box text, and state
+      sanitizeValidateAndBackendCall(decodedLink) // on page load, use decoded link and not state, bc state updates async
+    }
+  }, [])
+
+  // on button submit
+  const handleSubmit = (e: React.FormEvent) => {
+    e?.preventDefault()
+    sanitizeValidateAndBackendCall(link)
+  }
+  
+  const sanitizeLink = (link : string) : [string, string | null] => {
+    if (!link) return [link, "No string entered"]
+    const trimmedLowerLink = link.trim().toLowerCase()
+    // must be a spotify link
+    if (!trimmedLowerLink.startsWith('https://open.spotify.com/')) {
+      return [trimmedLowerLink, 'Not a valid spotify link: Does not start with "https://open.spotify.com/"']
+    }
+    return [trimmedLowerLink, null]
+  }
+
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  const sanitizeValidateAndBackendCall = (decodedLink : string) => {
+    // fully sanitize/validate 
+    // TODO add loading anim for checking string vs loading anim for requesting data
+    const [sanitizedLink, error] = sanitizeLink(decodedLink)
+    if (error) {
+      setValidationError(error)
+      return
+    }
+    setValidationError(null)
+
+    console.log('Link passed valididation: ' + sanitizedLink)
+    console.log('Requesting info...')
+    // backend request, display value/error
+    console.log(sanitizedLink?.split('/'))
+    const splitSanitizedLink = sanitizedLink?.split('/')
+    const id = splitSanitizedLink[4] 
+    const linkType = splitSanitizedLink[3]
+    if (!["album", "track", "artist"].includes(linkType)){
+      return console.log('Spotify link type not supported. Please use a different link.')
+    }
+    
+    setResourceForQuery({type: linkType, id: id})
+    // update page info
+  }
+
+  const queryFn = resourceForQuery?.type === "album"
+    ? () => getAlbumRec(resourceForQuery.id)
+    : resourceForQuery?.type === "artist"
+    ? () => getArtistRec(resourceForQuery.id)
+    : resourceForQuery?.type === "track"
+    ? () => getTrackRec(resourceForQuery.id)
+    : undefined
+
+  const { data : recs = [], error, isLoading, isFetched } = useQuery({
+  queryKey: resourceForQuery ? [resourceForQuery.type, resourceForQuery.id] : [],
+  queryFn: resourceForQuery ? queryFn! : () => Promise.resolve([]),
+  // enabled: !!resourceForQuery, --> only runs if theres a resourceForQuery, also enables auto refetching
+});
   return (
-    <section className='h-[100vh] w-full bg-red-200'>
-      <div>
-        <h1>Helo</h1>
-      </div>
+    // TODO make page not scrollable
+    <section className='h-[100vh] w-full flex flex-col justify-center items-center'>
+        <div className={`h-full w-full flex justify-center items-center flex-2 flex-col`}>
+          <form className='max-w-[1600px] mx-[10%] text-black flex flex-row' onSubmit={handleSubmit}>
+            <div className='flex justify-center items-center'>
+            <input 
+              className='flex px-2 mx-2 w-auto max-w-600 min-w-100 bg-white'
+              type='text'
+              value={link}
+              onChange={handleLinkChange}
+              placeholder='Enter a spotify link here'
+            />
+            </div>
+            <div className='flex justify-center items-center'>
+            <button className='px-2 mx-2 rounded-md   w-30 border-black border-1 bg-gray-300 hover:bg-gray-200 active:bg-gray-100' type="submit">Generate</button>
+            </div>
+          </form>
+          {validationError && (
+            <div className='my-2 flex'>{validationError}</div>
+          )}
+        </div>
+        { resourceForQuery && (
+          isLoading ? 
+          <div className='flex-1 flex justify-center items-center'>currently loading... please wait ...</div> 
+          : error ?
+          <div className='flex-1 flex justify-center items-center'>{error instanceof Error ? error.message : "An error occurred"}</div>
+          : isFetched && recs.length === 0 ?
+          <div className='flex-1 flex justify-center items-center'>0 recs</div>
+          :
+          <div className='flex-3 flex justify-center items-center'>{recs.map((rec:string[], i:number) => (
+            <div key={i}>
+              {rec}
+            </div>
+          ))}
+          </div>
+          
+        )}
+        
+
     </section>
-    // <div className="bg-blue-700 min-h-[calc(100vh-120px)] flex flex-col justify-start items-center">
-    //   <div className='border-t-100 border-blue-700'>
-    //     <h1 className="text-7xl text-white font-bold pt-20 pb-6">Song Recs</h1>
-    //     <p className='text-white text-center italic pb-6'>For more information, visit the Docs page.</p>
-    //   </div>
-    //   <div className='bg-blue-700 border-b-4 border-blue-700 flex'>
-    //     <input className='bg-white rounded-lg focus:outline-none focus:ring-0 w-100 px-4'
-    //       type="text"
-    //       value={link}
-    //       onChange={handleLinkChange} // Update state as user types
-    //       placeholder="Enter a spotify link here"
-    //     />
-    //     <div className='bg-blue-700 min-w-20'></div>
-    //     <button onClick={handleAPI} className='rounded-lg bg-white px-3 py-2 
-    //     hover:cursor-pointer hover:bg-slate-300 active:bg-slate-400'>Click here for genres</button>
-    //     <div></div>
-    //   </div>
-    //   <div className="bg-blue-700 min-h-20 flex justify-center items-center">
-    //     <p className="text-white text-center">
-    //       {genreAPI.length === 0 ? ""
-    //         : genreAPI.length === 1 ? genreAPI[0]
-    //         : <>Genres found: {genreAPI[genreAPI.length-2]}<br />Supported genres: {genreAPI[genreAPI.length-1]}<br />Recommendations are:</>}
-    //     </p>
-    //   </div>
-    //   <div className='flex flex-row w-full'>
-    //     <div className='bg-blue-700 w-20 h-20'></div>
-    //     {/* TODO BUTTONS for each one? */}
-    //     <div className='w-full grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 bg-blue-700'>
-    //       {genreAPI.length > 1 && Array.from({ length: genreAPI.length - 2 }).map((_, index) => (
-    //         <div className="bg-white py-4 text-center" key={index}>
-    //           <p>{genreAPI[index]}</p>
-    //         </div>
-    //       ))}
-    //     </div>
-    //     <div className='bg-blue-700 w-20 h-20'></div>
-    //   </div>
-    // </div>
   )
 }
+
