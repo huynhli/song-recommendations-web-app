@@ -9,12 +9,22 @@ import (
 func SetupRoutes(app *fiber.App) {
 	// Register routes for authentication
 	app.Get("/", homePage)
-	app.Get("/api/data", handlers.GetRecommendationsAPI) //TODO change to GetRecommendationsAPI
+
+	api := app.Group("/api/v1")
+
+	lastFMAPI := api.Group("/lastfm")
+	lastFMAPI.Get("/track", handlers.LastFMRecs)
+	lastFMAPI.Get("/lastFMRec	/artist", handlers.LastFMRecs)
+	lastFMAPI.Get("/")
+
+	// musicBrainzAPI = api.Group("/musicBrainz")
+
+	// deezerAPI := api.Group("/deezer")
 }
 
 func homePage(c *fiber.Ctx) error {
 
-	return c.SendString("Hi this is the home page of the song recommendation web app. The Github repo can be found at: https://github.com/huynhli/song-recommendations-web-app")
+	return c.SendString("Hi this is the home page of a song recommendation web app. The Github repo can be found at: https://github.com/huynhli/similarSongs")
 }
 
 // func getGenreAPI(c *fiber.Ctx) error {

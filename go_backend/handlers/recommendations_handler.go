@@ -8,13 +8,21 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetRecommendationsAPI(c *fiber.Ctx) error {
-	rand.Seed(time.Now().UnixNano())
+func LastFMRecs(c *fiber.Ctx) error {
+	linkType := c.Query("type")
+
+	switch linkType {
+	case "artist":
+		break
+	case "track":
+		break
+	case "album":
+		break
+	}
 
 	// if an error occured
 	returnedGenres, token := GetGenreFromAPI(c)
@@ -32,35 +40,16 @@ func GetRecommendationsAPI(c *fiber.Ctx) error {
 
 	supportedGenresList := []string{}
 	playlistIDs := []string{}
-	for _, eachGenre := range returnedGenres {
-		// TODO throw playlist links in a file and call dynamically
-		switch eachGenre {
-		case "rap":
-			playlistIDs = append(playlistIDs, "7k8E4tmsRVxLSQitB9bYPQ")
-			playlistIDs = append(playlistIDs, "01MRi9jFGeSEEttKOk7VgR")
-			playlistIDs = append(playlistIDs, "23bBJex1i75b9oqUo6jUCC")
-			playlistIDs = append(playlistIDs, "7JIGfa0KkCTDxUPOQySODP")
-			supportedGenresList = append(supportedGenresList, "rap")
-		case "hip hop":
-			playlistIDs = append(playlistIDs, "62y3BHKehWnb1hlaPclDAA")
-			playlistIDs = append(playlistIDs, "5oN7X3cPTUkOJFPmVx5wCE")
-			playlistIDs = append(playlistIDs, "0dMexqq0XIWS3QJ74z3ZhD")
-			playlistIDs = append(playlistIDs, "6WnTjZBYrYOdPl4pK7PyZg")
-			supportedGenresList = append(supportedGenresList, "hip hop")
-		case "pop":
-			playlistIDs = append(playlistIDs, "1WH6WVBwPBz35ZbWsgCpgr")
-			playlistIDs = append(playlistIDs, "3JoHkM90TXzfIS1RMN0Cgd")
-			playlistIDs = append(playlistIDs, "2L2HwKRvUgBv1YetudaRI3")
-			playlistIDs = append(playlistIDs, "2Sxd5BovYwLgRg6KyZOTer")
-			supportedGenresList = append(supportedGenresList, "pop")
-		case "rock":
-			playlistIDs = append(playlistIDs, "1Kgkkup7w9qvGxGJGa75PS")
-			playlistIDs = append(playlistIDs, "77RvyLiqmUimojxq3vg6mY")
-			playlistIDs = append(playlistIDs, "23hD5D7bvXtkJGz2ni7s9e")
-			playlistIDs = append(playlistIDs, "7KahejEXeb27cRJCFt3VFO")
-			supportedGenresList = append(supportedGenresList, "rock")
-		}
-	}
+	// for _, eachGenre := range returnedGenres {
+	// 	// TODO throw playlist links in a file and call dynamically
+	// 	switch eachGenre {
+	// case "rap":
+	// 	playlistIDs = append(playlistIDs, "7k8E4tmsRVxLSQitB9bYPQ")
+	// 	playlistIDs = append(playlistIDs, "01MRi9jFGeSEEttKOk7VgR")
+	// 	playlistIDs = append(playlistIDs, "23bBJex1i75b9oqUo6jUCC")
+	// 	playlistIDs = append(playlistIDs, "7JIGfa0KkCTDxUPOQySODP")
+	// 	supportedGenresList = append(supportedGenresList, "rap")
+	// }
 
 	for _, eachPlaylistId := range playlistIDs {
 		// getting offset num
