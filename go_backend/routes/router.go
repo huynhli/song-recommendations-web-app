@@ -13,8 +13,8 @@ func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/v1")
 
 	lastFMAPI := api.Group("/lastfm")
-	lastFMAPI.Get("/track", handlers.LastFMRecs)
-	lastFMAPI.Get("/lastFMRec	/artist", handlers.LastFMRecs)
+	lastFMAPI.Get("/track", handlers.InToOut)
+	lastFMAPI.Get("/artist", handlers.InToOut)
 	lastFMAPI.Get("/")
 
 	// musicBrainzAPI = api.Group("/musicBrainz")

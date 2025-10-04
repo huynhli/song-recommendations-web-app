@@ -10,7 +10,7 @@ import (
 var (
 	SpotifyClientID     string
 	SpotifyClientSecret string
-	SpotifyRedirectURI  string
+	// SpotifyRedirectURI  string
 )
 
 func LoadConfig() {
@@ -22,5 +22,5 @@ func LoadConfig() {
 	// Set config variables from environment variables
 	SpotifyClientID = os.Getenv("SPOTIFY_CLIENT_ID")
 	SpotifyClientSecret = os.Getenv("SPOTIFY_CLIENT_SECRET")
-	SpotifyRedirectURI = "https://song-recommendations-web-app.pages.dev/auth/callback" // Redirect URI for your app TODO fix when frontend hosted
+	// SpotifyRedirectURI = "https://song-recommendations-web-app.pages.dev/auth/callback" // Redirect URI for your app TODO fix when frontend hosted
 }
